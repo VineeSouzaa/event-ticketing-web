@@ -1,26 +1,97 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+ * Design tokens ported from the Lovable-generated "neon-login-glow" source
+ * (see ~/Projects/personal/event-ticketing/neon-login-glow). Only the :root
+ * block is carried over — the source project's .dark block was a vestigial,
+ * never-customized shadcn default that didn't continue the neon aesthetic,
+ * so it's intentionally not ported. This app doesn't have a light/dark
+ * toggle; the neon-dark palette below is the only theme.
+ */
 @theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-dm-sans);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.115 0.005 165);
+  --foreground: oklch(0.96 0.004 165);
+  --card: oklch(0.16 0.005 165);
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.86 0.18 160);
+  --primary-foreground: oklch(0.16 0.025 165);
+  --secondary: oklch(0.18 0.005 165);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.2 0.005 165);
+  --muted-foreground: oklch(0.61 0.009 165);
+  --accent: oklch(0.24 0.012 165);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.27 0.008 165);
+  --input: oklch(0.29 0.008 165);
+  --ring: var(--primary);
+  --shadow-neon: 0 0 28px color-mix(in oklch, var(--primary) 13%, transparent);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
 }
+
+/* --- Login screen (ported from neon-login-glow) --- */
+.login-page { position: relative; min-height: 100svh; isolation: isolate; overflow: hidden; }
+.wave-background { position: absolute; z-index: -2; bottom: -12%; left: -5%; width: 110%; max-width: none; height: 100%; object-fit: cover; object-position: center bottom; opacity: .65; animation: wave-breathe 12s ease-in-out infinite alternate; pointer-events: none; }
+.login-page::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, var(--background) 0%, color-mix(in oklch, var(--background) 94%, transparent) 40%, color-mix(in oklch, var(--background) 20%, transparent) 100%); pointer-events: none; }
+.login-header { display: flex; justify-content: space-between; align-items: center; padding: 32px 48px; }
+.wordmark { display: flex; align-items: center; gap: 9px; font-size: 27px; font-weight: 700; }
+.wordmark svg { width: 25px; height: 25px; color: var(--primary); }
+.login-main { min-height: calc(100svh - 190px); display: flex; align-items: center; justify-content: center; padding: 42px 24px 85px; }
+.login-form { width: 100%; max-width: 380px; animation: reveal .7s ease-out both; }
+.login-emblem { width: 58px; height: 58px; display: grid; place-items: center; margin: 0 auto 26px; border: 1px solid color-mix(in oklch, var(--primary) 25%, var(--border)); border-radius: 15px; background: color-mix(in oklch, var(--primary) 5%, var(--background)); box-shadow: var(--shadow-neon); color: var(--primary); }
+.login-heading { text-align: center; margin-bottom: 32px; }
+.login-heading h1 { font-size: 30px; line-height: 1.25; font-weight: 600; margin-bottom: 10px; }
+.login-heading p { font-size: 14px; color: var(--muted-foreground); }
+.field-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 9px; }
+.login-field { position: relative; }
+.login-field > svg { position: absolute; left: 15px; top: 16px; width: 17px; height: 17px; color: var(--muted-foreground); pointer-events: none; }
+.login-input { height: 50px; width: 100%; border: 1px solid var(--input); border-radius: var(--radius); background: color-mix(in oklch, var(--secondary) 80%, transparent); color: var(--foreground); padding: 0 44px; font-size: 14px; outline: none; transition: border-color .2s, box-shadow .2s; }
+.login-input::placeholder { color: var(--muted-foreground); opacity: .7; }
+.login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 10%, transparent); }
+.password-toggle { position: absolute; right: 7px; top: 7px; color: var(--muted-foreground); }
+.login-divider { display: flex; align-items: center; gap: 16px; margin: 25px 0; color: var(--muted-foreground); font-size: 11px; }
+.login-divider::before, .login-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.login-footer { position: relative; display: flex; justify-content: space-between; align-items: center; padding: 22px 48px 28px; color: var(--muted-foreground); font-size: 12px; }
+.connection-note { display: flex; align-items: center; gap: 7px; }
+.connection-note svg { width: 13px; height: 13px; }
+.form-notice { margin-top: 18px; border-left: 2px solid var(--primary); padding: 2px 0 2px 12px; font-size: 13px; line-height: 1.6; color: var(--muted-foreground); }
+@keyframes reveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes wave-breathe { from { transform: scale(1) translateY(0); opacity: .5; } to { transform: scale(1.035) translateY(-12px); opacity: .75; } }
+@media (min-width: 1600px) { .wave-background { height: 110%; } }
+@media (max-width: 640px) { .login-header { padding: 24px; } .login-header .account-prompt { display: none; } .login-main { min-height: calc(100svh - 158px); padding: 35px 24px 60px; } .login-heading h1 { font-size: 27px; } .login-footer { padding: 20px 24px; gap: 16px; font-size: 11px; } .wave-background { width: 200%; left: -50%; opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .wave-background, .login-form { animation: none; } }

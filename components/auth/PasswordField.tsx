@@ -23,7 +23,8 @@ export function PasswordField({ id, autoComplete, placeholder }: PasswordFieldPr
       type={visible ? 'text' : 'password'}
       autoComplete={autoComplete}
       placeholder={placeholder}
-      minLength={6}
+      minLength={12}
+      maxLength={128}
       required
       endAdornment={
         <Button

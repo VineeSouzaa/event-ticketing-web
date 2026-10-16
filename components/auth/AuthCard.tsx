@@ -2,36 +2,50 @@
 
 import { useState, type FormEvent } from 'react';
 import Image from 'next/image';
-import { ArrowRight, Fingerprint, Mail } from 'lucide-react';
+import { ArrowRight, Fingerprint, Mail, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoginField } from './LoginField';
 import { PasswordField } from './PasswordField';
 import { AuthHeader } from './AuthHeader';
 import { AuthFooter } from './AuthFooter';
+import { useAuthSubmit } from './useAuthSubmit';
 
 export type AuthMode = 'login' | 'signup' | 'recovery';
 
 const HEADING: Record<AuthMode, { title: string; subtitle: string }> = {
-  login: { title: 'Bom ter você de volta.', subtitle: 'Entre na sua conta e sinta-se em casa.' },
-  signup: { title: 'Seu próximo começo.', subtitle: 'Crie sua conta. O espaço é seu.' },
-  recovery: { title: 'Vamos recuperar seu acesso.', subtitle: 'Informe o e-mail associado à sua conta.' },
+  login: {
+    title: 'Bom ter você de volta.',
+    subtitle: 'Entre na sua conta e sinta-se em casa.',
+  },
+  signup: {
+    title: 'Seu próximo começo.',
+    subtitle: 'Crie sua conta. O espaço é seu.',
+  },
+  recovery: {
+    title: 'Vamos recuperar seu acesso.',
+    subtitle: 'Informe o e-mail associado à sua conta.',
+  },
 };
 
-// NOTE: not wired to a real auth backend yet — this port only brings the UI over. Submit shows
-// an honest placeholder notice instead of pretending to authenticate.
 export function AuthCard() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [notice, setNotice] = useState('');
 
+  const auth = useAuthSubmit(mode);
+
   const changeMode = (next: AuthMode) => {
     setMode(next);
     setNotice('');
+    auth.clearError();
   };
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  // Recovery has no backend endpoint yet.
+  const previewRecovery = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setNotice('Esta é uma prévia da tela. O acesso às contas ainda não está conectado.');
+    setNotice('A recuperação de senha ainda não está disponível.');
   };
+
+  const submit = mode === 'recovery' ? previewRecovery : auth.submit;
 
   const heading = HEADING[mode];
 
@@ -47,7 +61,10 @@ export function AuthCard() {
         priority
       />
 
-      <AuthHeader mode={mode} onToggleMode={() => changeMode(mode === 'login' ? 'signup' : 'login')} />
+      <AuthHeader
+        mode={mode}
+        onToggleMode={() => changeMode(mode === 'login' ? 'signup' : 'login')}
+      />
 
       <main className="login-main">
         <section className="login-form" aria-labelledby="login-title">
@@ -71,18 +88,39 @@ export function AuthCard() {
               required
             />
 
+            {mode === 'signup' && (
+              <LoginField
+                label="Nome"
+                icon={User}
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                placeholder="Seu nome"
+                required
+              />
+            )}
+
             {mode !== 'recovery' && (
               <PasswordField
                 id="password"
-                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                placeholder={mode === 'signup' ? 'Crie uma senha' : 'Digite sua senha'}
+                autoComplete={
+                  mode === 'signup' ? 'new-password' : 'current-password'
+                }
+                placeholder={
+                  mode === 'signup' ? 'Mínimo de 12 caracteres' : 'Digite sua senha'
+                }
               />
             )}
 
             {mode === 'login' && (
               <div className="flex items-center justify-between text-xs">
                 <label className="flex cursor-pointer items-center gap-2 text-muted-foreground">
-                  <input type="checkbox" name="remember" className="size-3.5 accent-primary" />
+                  <input
+                    type="checkbox"
+                    name="remember"
+                    className="size-3.5 accent-primary"
+                  />
                   Lembrar de mim
                 </label>
                 <Button
@@ -96,9 +134,18 @@ export function AuthCard() {
               </div>
             )}
 
-            <Button variant="neon" type="submit" className="h-[50px] w-full justify-between px-5 text-sm font-semibold">
+            <Button
+              variant="neon"
+              type="submit"
+              disabled={auth.pending}
+              className="h-50px w-full justify-between px-5 text-sm font-semibold"
+            >
               <span className="w-4" aria-hidden="true" />
-              {mode === 'login' ? 'Entrar' : mode === 'signup' ? 'Criar conta' : 'Enviar link de recuperação'}
+              {mode === 'login'
+                ? 'Entrar'
+                : mode === 'signup'
+                  ? 'Criar conta'
+                  : 'Enviar link de recuperação'}
               <ArrowRight />
             </Button>
           </form>
@@ -108,8 +155,12 @@ export function AuthCard() {
               <div className="login-divider">ou continue com</div>
               <Button
                 variant="social"
-                className="h-[50px] w-full"
-                onClick={() => setNotice('O acesso com Google ainda não está conectado nesta prévia.')}
+                className="h-50px w-full"
+                onClick={() =>
+                  setNotice(
+                    'O acesso com Google ainda não está disponível.',
+                  )
+                }
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4">
                   <path
@@ -121,17 +172,23 @@ export function AuthCard() {
               </Button>
             </>
           ) : (
-            <Button variant="ghost" className="mt-5 w-full text-muted-foreground" onClick={() => changeMode('login')}>
+            <Button
+              variant="ghost"
+              className="mt-5 w-full text-muted-foreground"
+              onClick={() => changeMode('login')}
+            >
               Voltar para o login
             </Button>
           )}
 
-          {notice && (
+          {(auth.error || notice) && (
             <p role="status" className="form-notice">
-              {notice}
+              {auth.error || notice}
             </p>
           )}
-          <p className="mt-8 text-center text-xs text-muted-foreground">Seu espaço, em outra frequência.</p>
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            Seu espaço, em outra frequência.
+          </p>
         </section>
       </main>
 

@@ -84,6 +84,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["EventsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["EventsController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -107,6 +139,54 @@ export interface components {
             /** @example ana@example.com */
             email: string;
             password: string;
+        };
+        EventSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            category: string;
+            /** Format: date-time */
+            startsAt: string;
+            venue: string;
+            city: string;
+            imageUrl: string | null;
+            /**
+             * @description Cheapest tier price; null when the event has no tiers
+             * @example 85.00
+             */
+            minPrice: string | null;
+        };
+        EventPageDto: {
+            items: components["schemas"]["EventSummaryDto"][];
+            /** @description Pass as `cursor` to get the next page; null on the last page */
+            nextCursor: string | null;
+        };
+        TicketTierDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @example 85.00 */
+            price: string;
+            totalQuantity: number;
+            available: number;
+        };
+        EventDetailDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            category: string;
+            /** Format: date-time */
+            startsAt: string;
+            venue: string;
+            city: string;
+            imageUrl: string | null;
+            /**
+             * @description Cheapest tier price; null when the event has no tiers
+             * @example 85.00
+             */
+            minPrice: string | null;
+            description: string;
+            tiers: components["schemas"]["TicketTierDto"][];
         };
     };
     responses: never;
@@ -234,6 +314,67 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UserResponseDto"];
                 };
+            };
+        };
+    };
+    EventsController_list: {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from a previous page */
+                cursor?: string;
+                limit?: number;
+                /** @description Matches name, category, venue and city */
+                q?: string;
+                category?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventPageDto"];
+                };
+            };
+            /** @description Invalid cursor or query parameter */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EventsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventDetailDto"];
+                };
+            };
+            /** @description Event not found or not published */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
